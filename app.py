@@ -258,6 +258,38 @@ def delete_user():
     return redirect("/signup")
 
 
+@app.route('/users/toggle_like/<int:msg_id>', methods=["POST"])
+def toggle_like(msg_id):
+    """ Add or remove like for the currently-logged-in user. """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    liked_msg = Message.query.get_or_404(msg_id)
+
+    if liked_msg in g.user.likes:
+        g.user.likes.remove(liked_msg)
+    else:
+        g.user.likes.append(liked_msg)
+
+    db.session.commit()
+
+    return redirect(f'/users/{g.user.id}/likes')
+
+
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """ Show messages liked by this user. """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    user = User.query.get_or_404(user_id)
+    return render_template("/users/likes.html", user=user)
+
+
 ##############################################################################
 # Messages routes:
 
@@ -330,8 +362,11 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
-
-        return render_template('home.html', messages=messages)
+        likes = []
+        for like in g.user.likes:
+            likes.append(like.id)
+        print(likes)
+        return render_template('home.html', messages=messages, likes=likes)
 
     else:
         return render_template('home-anon.html')
