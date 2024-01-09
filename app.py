@@ -65,6 +65,10 @@ def signup():
     and re-present form.
     """
 
+    if CURR_USER_KEY in session:
+        flash("You are already logged in.", 'danger')
+        return redirect("/")
+
     form = UserAddForm()
 
     if form.validate_on_submit():
