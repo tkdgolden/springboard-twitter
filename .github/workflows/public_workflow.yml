@@ -36,5 +36,6 @@ jobs:
       - name: Run the tests
         run: |
           export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/warbler-test"
+          sudo service postgresql start
           createdb warbler-test
           pytest
