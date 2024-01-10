@@ -355,7 +355,6 @@ def homepage():
         people = []
         for person in g.user.following:
             people.append(person.id)
-        print(people)
         messages = (Message
                     .query
                     .filter(Message.user_id.in_(people))
@@ -365,7 +364,6 @@ def homepage():
         likes = []
         for like in g.user.likes:
             likes.append(like.id)
-        print(likes)
         return render_template('home.html', messages=messages, likes=likes)
 
     else:
