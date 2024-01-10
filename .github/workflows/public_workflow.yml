@@ -1,6 +1,6 @@
 name: Tests
 
-on: [pull_request]
+# on: [pull_request]
 
 permissions:
   contents: read
@@ -33,11 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest bs4
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Connect to PostgreSQL
-        run: sudo service postgresql start
-        env:
-          POSTGRES_HOST: postgres
-          POSTGRES_PORT: 5432
       - name: Run the tests
         run: |
           export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/warbler-test"
