@@ -7,7 +7,7 @@
 
 import os
 from unittest import TestCase
-
+from sqlalchemy import exc
 from models import db, connect_db, Message, User
 
 # BEFORE we import our app, let's set an environmental variable
@@ -51,8 +51,8 @@ class MessageViewTestCase(TestCase):
 
         db.session.commit()
 
-    def test_add_message(self):
-        """Can use add a message?"""
+    def test_add_message_redirect(self):
+        """When you're logged in, can you add a message as yourself? REDIRECT"""
 
         # Since we need to change the session to mimic logging in,
         # we need to use the changing-session trick:
@@ -71,3 +71,75 @@ class MessageViewTestCase(TestCase):
 
             msg = Message.query.one()
             self.assertEqual(msg.text, "Hello")
+            self.assertEqual(resp.location, f"http://localhost/users/{self.testuser.id}")
+
+
+    def test_add_message_follow(self):
+        """When you're logged in, can you add a message as yourself? FOLLOW"""
+
+        # Since we need to change the session to mimic logging in,
+        # we need to use the changing-session trick:
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            # Now, that session setting is saved, so we can have
+            # the rest of ours test
+
+            resp = c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            # Make sure it redirects
+            self.assertEqual(resp.status_code, 200)
+
+            msg = Message.query.one()
+            self.assertEqual(msg.text, "Hello")
+            self.assertIn("Hello", html)
+
+
+    def test_delete_message_redirect(self):
+        """When you're logged in, can you delete a message as yourself? REDIRECT"""
+
+        # Since we need to change the session to mimic logging in,
+        # we need to use the changing-session trick:
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            # Now, that session setting is saved, so we can have
+            # the rest of ours test
+
+            c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            msg = Message.query.one()
+            resp = c.post(f"/messages/{msg.id}/delete")
+
+            # Make sure it redirects
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual([], Message.query.all())
+            self.assertEqual(resp.location, f"http://localhost/users/{self.testuser.id}")
+
+
+    def test_delete_message_follow(self):
+        """When you're logged in, can you delete a message as yourself? FOLLOW"""
+
+        # Since we need to change the session to mimic logging in,
+        # we need to use the changing-session trick:
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            # Now, that session setting is saved, so we can have
+            # the rest of ours test
+
+            c.post("/messages/new", data={"text": "Hello"}, follow_redirects=True)
+            msg = Message.query.one()
+            resp = c.post(f"/messages/{msg.id}/delete", follow_redirects=True)
+            html = resp.get_data(as_text=True)
+
+            # Make sure it redirects
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual([], Message.query.all())
+            self.assertNotIn("Hello", html)
