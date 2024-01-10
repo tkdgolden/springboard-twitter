@@ -258,22 +258,7 @@ def delete_user():
     return redirect("/signup")
 
 
-@app.route('/users/toggle_like/<int:msg_id>', methods=["POST"])
-def toggle_like(msg_id):
-    """ Add or remove like for the currently-logged-in user. """
 
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-    
-    liked_msg = Message.query.get_or_404(msg_id)
-
-    if liked_msg in g.user.likes:
-        g.user.likes.remove(liked_msg)
-    else:
-        g.user.likes.append(liked_msg)
-
-    db.session.commit()
 
     return redirect(f'/users/{g.user.id}/likes')
 
@@ -320,7 +305,7 @@ def messages_add():
 def messages_show(message_id):
     """Show a message."""
 
-    msg = Message.query.get(message_id)
+    msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
 
 
@@ -333,10 +318,32 @@ def messages_destroy(message_id):
         return redirect("/")
 
     msg = Message.query.get(message_id)
-    db.session.delete(msg)
-    db.session.commit()
+    if msg in g.user.messages:
+        db.session.delete(msg)
+        db.session.commit()
+    else:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
     return redirect(f"/users/{g.user.id}")
+
+
+@app.route('/messages/<int:msg_id>/like', methods=["POST"])
+def toggle_like(msg_id):
+    """ Add or remove like for the currently-logged-in user. """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    liked_msg = Message.query.get_or_404(msg_id)
+
+    if liked_msg in g.user.likes:
+        g.user.likes.remove(liked_msg)
+    else:
+        g.user.likes.append(liked_msg)
+
+    db.session.commit()
 
 
 ##############################################################################
