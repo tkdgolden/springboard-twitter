@@ -36,5 +36,5 @@ jobs:
       - name: Run the tests
         run: |
           export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/warbler-test"
-          connect_db(app)
+          createdb warbler-test
           pytest
