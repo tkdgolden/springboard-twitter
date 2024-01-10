@@ -33,6 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest bs4
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          sudo service postgresql start
           createdb warbler-test
       - name: Run the tests
         run: |

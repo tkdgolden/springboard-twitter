@@ -5,6 +5,6 @@ createdb warbler
 python seed.py
 flask run
 
-
+sudo service postgresql start
 createdb warbler-test
 FLASK_ENV=production python -m unittest
