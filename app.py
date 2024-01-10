@@ -258,11 +258,6 @@ def delete_user():
     return redirect("/signup")
 
 
-
-
-    return redirect(f'/users/{g.user.id}/likes')
-
-
 @app.route('/users/<int:user_id>/likes')
 def users_likes(user_id):
     """ Show messages liked by this user. """
