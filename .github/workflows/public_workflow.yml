@@ -33,14 +33,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pytest bs4
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: SETUP DATABASES
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: warbler-test
-        run: |
-          postgresql start
-          createdb warbler-test
       - name: Run the tests
         run: |
           export DATABASE_URL="postgresql://postgres:postgres@localhost:5432/warbler-test"
