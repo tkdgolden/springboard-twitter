@@ -39,7 +39,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_DB: warbler-test
         run: |
-          sudo service postgresql start
           createdb warbler-test
       - name: Run the tests
         run: |
