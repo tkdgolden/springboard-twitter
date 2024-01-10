@@ -345,6 +345,8 @@ def toggle_like(msg_id):
 
     db.session.commit()
 
+    return redirect(f"/users/{g.user.id}/likes")
+
 
 ##############################################################################
 # Homepage and error pages
